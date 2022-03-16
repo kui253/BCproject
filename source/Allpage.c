@@ -1,10 +1,12 @@
 #include "public.h"
 #include "Allpage.h"
 #include "operator.h"
-
+extern const char keypass[10];
+extern int n;
 extern int page;
 extern  node* node_cur;
 extern  node* node_head;
+char tempkeypass[10];
 int tmpCarType = 0;//用来记录当前的车辆的车辆的信息，因为在修改信息返回的时候要把框中的信息归位
 char tmpPhonenum[15];
 char tmpPassport[20];
@@ -20,7 +22,7 @@ int lenPageCarIfm[3] = {0};
 int lenPageHealthIns[4] = {0};
 int lenPageAcciIns[4] = {0};
 int lenPageTravelIns[4] = {0};
-
+int lenPageAdminLogin = 0;
 //信号灯变量
 int fgCarIns[3] = {1};//这个用来判断选项是不是已经选择了
 int fgHealthIns[3] = {1};
@@ -36,8 +38,22 @@ int tmpInsCar[3];
 int tmpIns = 0;
 int talPrice_dec = 0;
 char talPrice_str[5];
+char n_str[3];
 int pagefg = 0;//用于判断是哪个界面过去的1、车险 2、健康险 3、意外险 4、旅行险
+
+//用来管理员界面的状态
+int pageMenuStatus[3] = {1};
+int pageCheckStatus[2] = {1};
+int status = 1;
+int pageShowTimes = 0;
+int dataRest = 0; 
+node* ptop[6];
+int pageSeq = 0;
+int y = 190;
+int i = 1;
+node* pcur;
 //初始的登陆界面显示函数
+
 void g_pageMain(){
     cleardevice();
 	setbkcolor(LIGHTGRAY);
@@ -104,7 +120,14 @@ void g_pageMain(){
 	setfillstyle(1,GREEN);
 	floodfill(100,370,YELLOW);
 
-
+	//admin button
+	//admin button
+	setcolor(WHITE);
+	puthz(280,380,"我是管理员",16,15,LIGHTBLUE);
+	setlinestyle(SOLID_LINE,0,NORM_WIDTH);
+	moveto(279,379);
+	lineto(355,379);
+	lineto(355,396);
 }
 void s_pageMain(){//（pending）
 	mouseinit();
@@ -121,6 +144,18 @@ void s_pageMain(){//（pending）
 				clrmous(MouseX,MouseY);
 				page = 'q';
 				break;
+		}
+		//点击我是管理员时
+		else if(MouseX>279&&MouseX<355&&MouseY>379&&MouseY<396){
+			if(mouse_press(279,379,355,396) == 2){
+				MouseS = 1;
+				continue;
+			}
+			else if(mouse_press(279,379,355,396) == 1){
+				clrmous(MouseX,MouseY);
+				page = pageAdminLogin;
+				break;
+			}
 		}
 		//当点击新用户时
 		else if (MouseX>225&&MouseX<405&&MouseY>320&&MouseY<360){
@@ -199,9 +234,424 @@ void s_pageMain(){//（pending）
 	
 	
 }
+void g_pageAdminLogin(){
+	cleardevice();
+	setbkcolor(LIGHTGRAY);
+	setcolor(BLUE);
+	setlinestyle(SOLID_LINE,0,THICK_WIDTH);
+	circle(320,110,40);
+	ellipse(320,230,0,180,80,80);
+	line(240,230,400,230);
+	setfillstyle(1,WHITE);
+	floodfill(320,140,BLUE);
+	floodfill(320,170,BLUE);
+	setcolor(BLUE);
+	line(170,250,470,250);
+	setcolor(WHITE);
+	bar(160,270,480,320);
+	puthz(170,280,"请输入密钥",32,30,LIGHTGRAY);
+	setlinestyle(SOLID_LINE,0,NORM_WIDTH);
+	setcolor(DARKGRAY);
+	line(165,276,165,314);
+	//确定键
+	setfillstyle(1,LIGHTGREEN);
+	bar(250,340,390,380);
+	puthz(295,350,"确定",24,30,DARKGRAY);
+	
+	//返回键
+	setfillstyle(1,RED);
+	bar(50,410,120,450);
+	puthz(60,420,"返回",24,25,WHITE);
+}
+	
+void s_pageAdminLogin(){
+	//翻页用的一些数据
+	pageShowTimes = n/3;
 
+	dataRest = n%3;
+	ptop[0] = node_head;
+	if(dataRest){
+		pageShowTimes++;
+	}
+	for(i;i<pageShowTimes;i++){
+		ptop[i] = mod3List(ptop[i-1]);
+	}
+	while(1){
+		newmouse(&MouseX,&MouseY,&press);
+		if(MouseX>160&&MouseX<480&&MouseY>270&&MouseY<320){//输入框
+			if(mouse_press(160,270,480,320) == 2){
+				MouseS = 2;
+				continue;
+			}
+			else if(mouse_press(160,270,480,320) == 1){
+				setfillstyle(1,WHITE);
+				bar(160,270,480,320);
+				lenPageAdminLogin = inputadmin(tempkeypass,165,278,9,WHITE,32);
+			}
+		}
+		else if (MouseX>250&&MouseX<390&&MouseY>340&&MouseY<380){//确定键
+			if(mouse_press(250,340,390,380) == 2){
+				MouseS = 1;
+				continue;
+			}
+			else if(mouse_press(250,340,390,380) == 1){
+				do{
+					newmouse(&MouseX,&MouseY,&press);
+				}while(mouse_press(250,340,390,380) == 1);
+				if(lenPageAdminLogin){
+					if(strcmp(tempkeypass,keypass) == 0){
+						clrmous(MouseX,MouseY);
+						page = pageAdminMenu;
+						break;
+					}
+					else {
+						puthz(300,410,"密钥错误",16,15,RED);
+						setfillstyle(1,LIGHTGRAY);
+						delay(500);
+						bar(290,405,370,430);
+						lenPageAdminLogin = 0;
+						setfillstyle(1,WHITE);
+						bar(160,270,480,320);
+						continue;
+					}
+				}
+				else {
+					puthz(300,410,"输入为空",16,15,RED);
+					delay(500);
+					setfillstyle(1,LIGHTGRAY);
+					bar(290,405,370,430);
+					continue;
+				}
+				
+			}
+		}
+		else if(MouseX>50&&MouseX<120&&MouseY>410&&MouseY<450){
+			if(mouse_press(50,410,120,450) == 2){
+				MouseS = 1;
+				continue;
+			}
+			else if(mouse_press(50,410,120,450) == 1){
+				clrmous(MouseX,MouseY);
+				lenPageAdminLogin = 0;
+				page = pageMain;
+				break;
+			}
+		}
+		if(MouseS!= 0)MouseS = 0;
+	}
+}
+//管理员的操作界面
+void g_pageAdminMenu(){
+	cleardevice();
+	setbkcolor(LIGHTGRAY);
+	setfillstyle(1,DARKGRAY);
+	bar(50,90,290,270);
+	bar(350,90,590,270);
+	setlinestyle(SOLID_LINE,0,THICK_WIDTH);
+	setcolor(WHITE);
+	moveto(280,200);
+	lineto(280,100);
+	lineto(60,100);
+	lineto(60,250);
+	lineto(220,250);
+	circle(100,140,10);
+	moveto(100,160);
+	lineto(80,200);
+	lineto(120,200);
+	lineto(100,160);
+	line(140,140,240,140);
+	line(140,160,230,160);
+	line(140,180,250,180);
+	circle(240,220,20);
+	line(260,240,280,260);
+	//第二块
+	moveto(520,250);
+	lineto(360,250);
+	lineto(360,100);
+	lineto(580,100);
+	lineto(580,200);
+	circle(400,140,10);
+	moveto(400,160);
+	lineto(380,200);
+	lineto(420,200);
+	lineto(400,160);
+	line(440,140,540,140);
+	line(440,160,530,160);
+	line(440,180,550,180);
+	moveto(550,210);
+	lineto(560,200);
+	moveto(550,210);
+	lineto(540,200);
+	moveto(550,210);
+	lineto(550,250);
+	line(535,210,565,210);
+	line(535,226,565,226);
+	//退出系统
+	circle(320,380,50);
+	circle(320,380,40);
+	setfillstyle(1,RED);
+	floodfill(320,380,WHITE);
+	puthz(298,360,"退出",24,20,WHITE);
+	puthz(290,385,"（下班）",16,15,WHITE);
+	puthz(100,220,"查看用户信息",16,15,WHITE);
+	puthz(400,220,"处理用户理赔",16,15,WHITE);
+	puthz(40,40,"你好，管理员",16,15,WHITE);
+}
+void s_pageAdminMenu(){
+	while(1){
+		newmouse(&MouseX,&MouseY,&press);
+		if(mouse_press(50,90,290,270) == 0){
+			puthz(100,220,"查看用户信息",16,15,WHITE);
+			pageMenuStatus[0] = 1;
+		}
+		if(mouse_press(350,90,590,270) == 0){
+			puthz(400,220,"处理用户理赔",16,15,WHITE);
+			pageMenuStatus[1] = 1;
+		}
+		if(mouse_press(270,330,370,430) == 0){
+			puthz(298,360,"退出",24,20,WHITE);
+			puthz(290,385,"（下班）",16,15,WHITE);
+			pageMenuStatus[2] = 1;
+		}
+		if(MouseX>270&&MouseX<370&&MouseY>330&&MouseY<430){//退出管理员系统
+			if(mouse_press(270,330,370,430) == 2){
+				MouseS = 1;
+				if(pageMenuStatus[2]){
+					puthz(298,360,"退出",24,20,YELLOW);
+					puthz(290,385,"（下班）",16,15,YELLOW);
+					pageMenuStatus[2] = 0;
+				}
+				continue;
+			}
+			else if(mouse_press(270,330,370,430) == 1){
+				clrmous(MouseX,MouseY);
+				page = pageMain;
+				break;
+			}
+		}
+		else if(MouseX>50&&MouseX<290&&MouseY>90&&MouseY<270){
+			if(mouse_press(50,90,290,270) == 2){
+				MouseS = 1;
+				if(pageMenuStatus[0]){
+					puthz(100,220,"查看用户信息",16,15,YELLOW);
+					pageMenuStatus[0] = 0;
+				}
+				continue;
+			}
+			else if(mouse_press(50,90,290,270) == 1){
+				clrmous(MouseX,MouseY);
+				page = pageAdminCheck;
+				break;
+			}
+		}
+		else if(MouseX>350&&MouseX<590&&MouseY>90&&MouseY<270){
+			if(mouse_press(350,90,590,270) == 2){
+				MouseS = 1;
+				if(pageMenuStatus[1]){
+					puthz(400,220,"处理用户理赔",16,15,YELLOW);
+					pageMenuStatus[1] = 0;
+				}
+				continue;
+			}
+			else if(mouse_press(350,90,590,270) == 1){
+				clrmous(MouseX,MouseY);
+				page = pageAdminDeal;
+				break;
+			}
+		}
+	}
+	
+}
 
-
+//管理员查看用户界面
+void g_pageAdminCheck(){
+	cleardevice();
+	setbkcolor(LIGHTGRAY);
+	setcolor(WHITE);
+	setlinestyle(SOLID_LINE,0,THICK_WIDTH);
+	circle(480,30,10);
+	ellipse(480,60,0,180,20,20);
+	line(460,60,500,60);
+	ellipse(490,54,0,90,17,14);
+	ellipse(490,30,270,90,10,10);
+	line(500,54,507,54);
+	line(515,70,620,70);
+	puthz(515,40,"总用户：",16,15,WHITE);
+	settextstyle(TRIPLEX_FONT, HORIZ_DIR, 2);
+	sprintf(n_str,"%d",n-1);
+	outtextxy(585,35,n_str);
+	setfillstyle(1,DARKGRAY);
+	bar(40,100,600,360);
+	setfillstyle(1,WHITE);
+	bar(60,180,580,220);
+	bar(60,240,580,280);
+	bar(60,300,580,340);
+	setcolor(BLUE);
+	line(80,90+70,150,90+70);
+	line(200,90+70,380,90+70);
+	line(430,90+70,550,90+70);
+	
+	setcolor(WHITE);
+	moveto(60,420);
+	lineto(80,400);
+	moveto(60,420);
+	lineto(140,420);
+	moveto(60,420);
+	lineto(80,440);
+	
+	moveto(580,420);
+	lineto(560,400);
+	moveto(580,420);
+	lineto(500,420);
+	moveto(580,420);
+	lineto(560,440);
+	puthz(90,130,"姓名",24,25,WHITE);
+	puthz(240,130,"电话号码",24,25,WHITE);
+	puthz(440,130,"车牌号码",24,25,WHITE);
+	
+}
+void s_pageAdminCheck(){
+	while(1){
+		newmouse(&MouseX,&MouseY,&press);
+		y = 190;
+		if(pageSeq == 0){
+			printList(ptop[pageSeq]);
+			if(MouseX>60&&MouseX<140&&MouseY>400&&MouseY<440){
+				if(mouse_press(60,400,140,440) == 2){
+					MouseS = 1;
+					continue;
+				}
+				else if(mouse_press(60,400,140,440) == 1){
+					clrmous(MouseX,MouseY);
+					page = pageAdminMenu;
+					break;
+				}
+			}
+			else if(MouseX>500&&MouseX<580&&MouseY>400&&MouseY<440){
+				if(mouse_press(500,400,580,440) == 2){
+					MouseS = 1;
+					continue;
+				}
+				else if(mouse_press(500,400,580,440) == 1){
+					pageSeq ++;
+					continue;
+				}
+			
+			}
+		}
+		else if(pageSeq == 1&&pageSeq != (pageShowTimes-1)){
+			clearBlank();
+			printList(ptop[pageSeq]);
+			if(MouseX>60&&MouseX<140&&MouseY>400&&MouseY<440){
+				if(mouse_press(60,400,140,440) == 2){
+					MouseS = 1;
+					continue;
+				}
+				else if(mouse_press(60,400,140,440) == 1){
+					clrmous(MouseX,MouseY);
+					pageSeq--;
+					continue;
+				}
+			}
+			else if(MouseX>500&&MouseX<580&&MouseY>400&&MouseY<440){
+				if(mouse_press(500,400,580,440) == 2){
+					MouseS = 1;
+					continue;
+				}
+				else if(mouse_press(500,400,580,440) == 1){
+					pageSeq ++;
+					continue;
+				}
+			
+			}
+		}
+		else if(pageSeq == 2&&pageSeq != pageShowTimes-1){
+			clearBlank();
+			printList(ptop[pageSeq]);
+			if(MouseX>60&&MouseX<140&&MouseY>400&&MouseY<440){
+				if(mouse_press(60,400,140,440) == 2){
+					MouseS = 1;
+					continue;
+				}
+				else if(mouse_press(60,400,140,440) == 1){
+					clrmous(MouseX,MouseY);
+					pageSeq--;
+					continue;
+				}
+			}
+			else if(MouseX>500&&MouseX<580&&MouseY>400&&MouseY<440){
+				if(mouse_press(500,400,580,440) == 2){
+					MouseS = 1;
+					continue;
+				}
+				else if(mouse_press(500,400,580,440) == 1){
+					pageSeq ++;
+					continue;
+				}
+			
+			}
+		}
+		else if(pageSeq == 2&&pageSeq!=pageShowTimes-1){
+			clearBlank();
+			printList(ptop[pageSeq]);
+			if(MouseX>60&&MouseX<140&&MouseY>400&&MouseY<440){
+				if(mouse_press(60,400,140,440) == 2){
+					MouseS = 1;
+					continue;
+				}
+				else if(mouse_press(60,400,140,440) == 1){
+					clrmous(MouseX,MouseY);
+					pageSeq--;
+					continue;
+				}
+			}
+			else if(MouseX>500&&MouseX<580&&MouseY>400&&MouseY<440){
+				if(mouse_press(500,400,580,440) == 2){
+					MouseS = 1;
+					continue;
+				}
+				else if(mouse_press(500,400,580,440) == 1){
+					pageSeq ++;
+					continue;
+				}
+			
+			}
+		}
+		else{
+			pcur = ptop[pageShowTimes-1];
+			while(dataRest--){
+				puthz(80,y,pcur->hosts.m_name,24,25,DARKGRAY);
+				setcolor(DARKGRAY);
+				outtextxy(220,y,pcur->hosts.m_phone);
+				puthz(430,y,pcur->hosts.carBandhz,24,1,DARKGRAY);
+				outtextxy(465,y,pcur->hosts.carBandstr);
+				pcur = pcur->next;
+				y += 60;
+			}
+		}
+			
+			
+		
+		
+		
+		// else{
+			// if(dataRest&&status){
+				// clearBlank();
+				// setfillstyle(1,LIGHTGRAY);
+				// printList(ptop[pageShowTimes]);
+				// status = 0;
+			// }
+			// if(dataRest == 0){
+				// setfillstyle(1,LIGHTGRAY);
+				// bar(497,397,582,442);
+			// }
+			
+		// }
+		
+		if(MouseS != 0)MouseS = 0;
+	}
+}
+					
 //新用户的界面函数,已修改
 void g_pageRegi(){
 	cleardevice();
@@ -217,12 +667,9 @@ void g_pageRegi(){
 	bar(150,260,520,300);
 	setfillstyle(1,LIGHTRED);
 	bar(120,360,220,400);//上一页框
-	
 	bar(410,360,510,400);//下一页框
 	puthz(130,370,"上一步",24,30,WHITE);
 	puthz(420,370,"下一步",24,30,WHITE);
-	
-	
 }
 void s_pageRegi(){
 	
