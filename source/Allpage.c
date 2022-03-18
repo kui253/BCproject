@@ -43,14 +43,16 @@ int pagefg = 0;//用于判断是哪个界面过去的1、车险 2、健康险 3、意外险 4、旅行险
 
 //用来管理员界面的状态
 int pageMenuStatus[3] = {1};
-int pageCheckStatus[2] = {1};
+int pageCheckStatus = 1;
 int status = 1;
 int pageShowTimes = 0;
 int dataRest = 0; 
+
 node* ptop[6];
 int pageSeq = 0;
 int y = 190;
 int i = 1;
+int looptimes = 3;
 node* pcur;
 //初始的登陆界面显示函数
 
@@ -266,16 +268,20 @@ void g_pageAdminLogin(){
 	
 void s_pageAdminLogin(){
 	//翻页用的一些数据
+	//*********************
+	n--;
 	pageShowTimes = n/3;
-
+	
 	dataRest = n%3;
 	ptop[0] = node_head;
 	if(dataRest){
 		pageShowTimes++;
 	}
 	for(i;i<pageShowTimes;i++){
-		ptop[i] = mod3List(ptop[i-1]);
+		ptop[i] = modList(ptop[i-1]);
 	}
+	//*********************
+	
 	while(1){
 		newmouse(&MouseX,&MouseY,&press);
 		if(MouseX>160&&MouseX<480&&MouseY>270&&MouseY<320){//输入框
@@ -478,8 +484,10 @@ void g_pageAdminCheck(){
 	line(515,70,620,70);
 	puthz(515,40,"总用户：",16,15,WHITE);
 	settextstyle(TRIPLEX_FONT, HORIZ_DIR, 2);
-	sprintf(n_str,"%d",n-1);
+	sprintf(n_str,"%d",n);
+
 	outtextxy(585,35,n_str);
+	
 	setfillstyle(1,DARKGRAY);
 	bar(40,100,600,360);
 	setfillstyle(1,WHITE);
@@ -509,145 +517,91 @@ void g_pageAdminCheck(){
 	puthz(240,130,"电话号码",24,25,WHITE);
 	puthz(440,130,"车牌号码",24,25,WHITE);
 	
+	
+	clearBlank();
+	printList(ptop[0],looptimes);
 }
 void s_pageAdminCheck(){
+	
+	y = 190;
 	while(1){
 		newmouse(&MouseX,&MouseY,&press);
-		y = 190;
-		if(pageSeq == 0){
-			printList(ptop[pageSeq]);
-			if(MouseX>60&&MouseX<140&&MouseY>400&&MouseY<440){
-				if(mouse_press(60,400,140,440) == 2){
-					MouseS = 1;
-					continue;
-				}
-				else if(mouse_press(60,400,140,440) == 1){
+		
+		if(MouseX>60&&MouseX<140&&MouseY>400&&MouseY<440){
+			if(mouse_press(60,400,140,440) == 2){
+				MouseS = 1;
+				continue;
+			}
+			else if(mouse_press(60,400,140,440) == 1){
+				do{
+					newmouse(&MouseX,&MouseY,&press);
+				}while(mouse_press(60,400,140,440) == 1);
+				if(pageSeq == 0){
 					clrmous(MouseX,MouseY);
 					page = pageAdminMenu;
+					pageSeq = 0;//重置一下pageSeq
 					break;
 				}
-			}
-			else if(MouseX>500&&MouseX<580&&MouseY>400&&MouseY<440){
-				if(mouse_press(500,400,580,440) == 2){
-					MouseS = 1;
+				else {
+					
+					pageSeq --;
+					pageCheckStatus = 1;
+					clearBlank();//清理一次显示的信息框
+					printList(ptop[pageSeq],looptimes);
 					continue;
 				}
-				else if(mouse_press(500,400,580,440) == 1){
-					pageSeq ++;
-					continue;
-				}
-			
 			}
 		}
-		else if(pageSeq == 1&&pageSeq != (pageShowTimes-1)){
-			clearBlank();
-			printList(ptop[pageSeq]);
-			if(MouseX>60&&MouseX<140&&MouseY>400&&MouseY<440){
-				if(mouse_press(60,400,140,440) == 2){
-					MouseS = 1;
-					continue;
-				}
-				else if(mouse_press(60,400,140,440) == 1){
-					clrmous(MouseX,MouseY);
-					pageSeq--;
-					continue;
-				}
-			}
-			else if(MouseX>500&&MouseX<580&&MouseY>400&&MouseY<440){
-				if(mouse_press(500,400,580,440) == 2){
-					MouseS = 1;
-					continue;
-				}
-				else if(mouse_press(500,400,580,440) == 1){
-					pageSeq ++;
-					continue;
-				}
+		else if(MouseX>500&&MouseX<580&&MouseY>400&&MouseY<440){
 			
+			if(mouse_press(500,400,580,440) == 2){
+						MouseS = 1;
+						continue;
+				}
+			else if(mouse_press(500,400,580,440) == 1){	
+				if(pageSeq != (pageShowTimes -1)){
+					do{
+						newmouse(&MouseX,&MouseY,&press);
+					}while(mouse_press(500,400,580,440) == 1);
+					pageSeq ++;//这里偷了一下懒，直接用一个判断语句来防止后面继续循环
+					if(pageSeq != (pageShowTimes -1)){
+						clearBlank();
+						printList(ptop[pageSeq],looptimes);
+						continue;
+					}
+				}
+				else{
+					if(pageCheckStatus){
+						//这里用来处理对于余数为0的情况。
+						if(dataRest){			
+							clearBlank();
+							looptimes = dataRest;
+							printList(ptop[pageShowTimes -1],looptimes);
+							looptimes = 3;
+							pageCheckStatus = 0;
+						}
+						else {
+							clearBlank();
+							printList(ptop[pageShowTimes-1],looptimes);
+							pageCheckStatus = 0;
+						}
+					}
+					
+						
+					if(mouse_press(500,400,580,440) == 1){
+						puthz(290,410,"已经是最后一页了",16,15,RED);
+						delay(500);
+						setfillstyle(1,LIGHTGRAY);
+						bar(285,405,440,470);
+						
+					}
+						
+				}
 			}
+			
+				
+			
 		}
-		else if(pageSeq == 2&&pageSeq != pageShowTimes-1){
-			clearBlank();
-			printList(ptop[pageSeq]);
-			if(MouseX>60&&MouseX<140&&MouseY>400&&MouseY<440){
-				if(mouse_press(60,400,140,440) == 2){
-					MouseS = 1;
-					continue;
-				}
-				else if(mouse_press(60,400,140,440) == 1){
-					clrmous(MouseX,MouseY);
-					pageSeq--;
-					continue;
-				}
-			}
-			else if(MouseX>500&&MouseX<580&&MouseY>400&&MouseY<440){
-				if(mouse_press(500,400,580,440) == 2){
-					MouseS = 1;
-					continue;
-				}
-				else if(mouse_press(500,400,580,440) == 1){
-					pageSeq ++;
-					continue;
-				}
-			
-			}
-		}
-		else if(pageSeq == 2&&pageSeq!=pageShowTimes-1){
-			clearBlank();
-			printList(ptop[pageSeq]);
-			if(MouseX>60&&MouseX<140&&MouseY>400&&MouseY<440){
-				if(mouse_press(60,400,140,440) == 2){
-					MouseS = 1;
-					continue;
-				}
-				else if(mouse_press(60,400,140,440) == 1){
-					clrmous(MouseX,MouseY);
-					pageSeq--;
-					continue;
-				}
-			}
-			else if(MouseX>500&&MouseX<580&&MouseY>400&&MouseY<440){
-				if(mouse_press(500,400,580,440) == 2){
-					MouseS = 1;
-					continue;
-				}
-				else if(mouse_press(500,400,580,440) == 1){
-					pageSeq ++;
-					continue;
-				}
-			
-			}
-		}
-		else{
-			pcur = ptop[pageShowTimes-1];
-			while(dataRest--){
-				puthz(80,y,pcur->hosts.m_name,24,25,DARKGRAY);
-				setcolor(DARKGRAY);
-				outtextxy(220,y,pcur->hosts.m_phone);
-				puthz(430,y,pcur->hosts.carBandhz,24,1,DARKGRAY);
-				outtextxy(465,y,pcur->hosts.carBandstr);
-				pcur = pcur->next;
-				y += 60;
-			}
-		}
-			
-			
-		
-		
-		
-		// else{
-			// if(dataRest&&status){
-				// clearBlank();
-				// setfillstyle(1,LIGHTGRAY);
-				// printList(ptop[pageShowTimes]);
-				// status = 0;
-			// }
-			// if(dataRest == 0){
-				// setfillstyle(1,LIGHTGRAY);
-				// bar(497,397,582,442);
-			// }
-			
-		// }
-		
 		if(MouseS != 0)MouseS = 0;
 	}
 }
