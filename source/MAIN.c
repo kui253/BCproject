@@ -1,14 +1,21 @@
-
+#include "Bdan.h"
 #include "public.h"
 #include "Allpage.h"
 #include "operator.h"
-
-int page = 1,fg1=1;//page 跳转页面函数
+const char keypass[10] = "2111yyds";//密钥
+int page = 1,fg1=1;//page 跳转页面函数,seq 用在Bdan里面
 node* node_cur;
 node* node_head;
+//用来查保单的一些变量
+Bnode* baod[6];
+Bnode* Bnode_header;
+	
 void main(){
 	int graphdriver = VGA;
 	int graphmode = VGAHI;
+	Bnode_header = initBnode();
+	ListCreat(Bnode_header);
+
 	initgraph(&graphdriver, &graphmode, "C:\\borlandc\\bgi");
 	
 	node_head = Create(node_head);
@@ -89,7 +96,36 @@ void main(){
 				s_pageShowIfm();
 				break;
 			}
-		
+			case pageAdminLogin :{
+				g_pageAdminLogin();
+				s_pageAdminLogin();
+				break;
+			}
+			case pageAdminMenu :{
+				g_pageAdminMenu();
+				s_pageAdminMenu();
+				break;
+			}
+			case pageAdminCheck :{
+				g_pageAdminCheck();
+				s_pageAdminCheck();
+				break;
+			}
+			case pageAdminDetail :{
+				g_pageAdminDetail();
+				s_pageAdminDetail();
+				break;
+			}
+			case pageAdminDeal1:{
+				g_pageAdminDeal1();
+				s_pageAdminDeal1();
+				break;
+			}
+			case pageAdminDeal2 : {
+				g_pageAdminDeal2();
+				s_pageAdminDeal2();
+				break;
+			}
 			default :
 			{
 				printf("error!!!");
@@ -100,7 +136,9 @@ void main(){
 	}
 
 	free(node_cur);
+	WriteToTxt(Bnode_header);
 	clear_LinkNode(node_head);
+	clearBnode(Bnode_header);
 	closegraph();
 }
 

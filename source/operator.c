@@ -1,6 +1,6 @@
 #include "public.h"
 #include "operator.h"
-
+int n = 0;
 
 //用来读取txt文件中的数据(这个还未完成)
 node* Create(node* phead) {
@@ -14,6 +14,7 @@ node* Create(node* phead) {
 
     phead = NULL;
     do {
+		n++;
 		pnew = (node*)malloc(sizeof(node));
 		
 		
@@ -26,12 +27,12 @@ node* Create(node* phead) {
             pend->next = pnew;//如果链表不为空，则把创建的新结点放在表尾结点之后
             pend = pnew;//再把创建的新结点作为表尾
         }
-    } while (fscanf(fp,"%s %s %s %s %d %s %s %d %d %d %s %s %s %s %d %s %s %s %s %d %s %s %s %s %d %s %s %s %s",
+    } while (fscanf(fp,"%s %s %s %s %d %s %s %d %d %d %s %s %s %s %d %s %s %s %s %d %s %s %s %s %d %s %s %s %s %d",
 		pnew->hosts.m_name,pnew->hosts.m_phone,pnew->hosts.passport,pnew->hosts.P_addr,&pnew->hosts.carType,pnew->hosts.carBandhz,pnew->hosts.carBandstr,
 		&pnew->hosts.Ins_Car[0],&pnew->hosts.Ins_Car[1],&pnew->hosts.Ins_Car[2],pnew->hosts.InsAddr,pnew->hosts.InsBandhz_car,pnew->hosts.InsBandstr_car,pnew->hosts.Insphonenum_car,
 		&pnew->hosts.Ins_Health,pnew->hosts.InsPname_health,pnew->hosts.InsBandhz_health,pnew->hosts.InsBandstr_health,pnew->hosts.Insphonenum_health,
 		&pnew->hosts.Ins_Acci,pnew->hosts.InsPname_acci,pnew->hosts.InsBandhz_acci,pnew->hosts.InsBandstr_acci,pnew->hosts.Insphonenum_acci,
-		&pnew->hosts.Ins_Travel,pnew->hosts.InsPname_travel,pnew->hosts.InsBandhz_travel,pnew->hosts.InsBandstr_travel,pnew->hosts.Insphonenum_travel)!=EOF);
+		&pnew->hosts.Ins_Travel,pnew->hosts.InsPname_travel,pnew->hosts.InsBandhz_travel,pnew->hosts.InsBandstr_travel,pnew->hosts.Insphonenum_travel,&pnew->hosts.BillsPrice)!=EOF);
     ppre->next = NULL;
     free(pend);
 	pend = NULL;
@@ -53,7 +54,8 @@ node* find_node(node* phead , char* phonenum)//这是一个查找指针，输入
 			return pcur;
 	}
 	else {
-		return NULL;//不存在就返回空指针
+		return NULL;//不存在就
+		//返回空指针
 	}
 }
 
@@ -129,10 +131,40 @@ void writeAll(node* phead){
 	fprintf(fp,"%d %d %d %s %s %s %s " ,pcur->hosts.Ins_Car[0],pcur->hosts.Ins_Car[1],pcur->hosts.Ins_Car[2],pcur->hosts.InsAddr,pcur->hosts.InsBandhz_car,pcur->hosts.InsBandstr_car,pcur->hosts.Insphonenum_car);
 	fprintf(fp,"%d %s %s %s %s ",pcur->hosts.Ins_Health,pcur->hosts.InsPname_health,pcur->hosts.InsBandhz_health,pcur->hosts.InsBandstr_health,pcur->hosts.Insphonenum_health);
 	fprintf(fp,"%d %s %s %s %s ",pcur->hosts.Ins_Acci,pcur->hosts.InsPname_acci,pcur->hosts.InsBandhz_acci,pcur->hosts.InsBandstr_acci,pcur->hosts.Insphonenum_acci);
-	fprintf(fp,"%d %s %s %s %s\n",pcur->hosts.Ins_Travel,pcur->hosts.InsPname_travel,pcur->hosts.InsBandhz_travel,pcur->hosts.InsBandstr_travel,pcur->hosts.Insphonenum_travel);
+	fprintf(fp,"%d %s %s %s %s %d\n",pcur->hosts.Ins_Travel,pcur->hosts.InsPname_travel,pcur->hosts.InsBandhz_travel,pcur->hosts.InsBandstr_travel,pcur->hosts.Insphonenum_travel,pcur->hosts.BillsPrice);
 	pcur = pcur->next;
 	}
-	close(fp);
+	fclose(fp);
 }
-
+//让它mod3 然后取出3n+1的地址
+node* modList(node * ptop){
+	int times = 3;
+	node * pcur = ptop;
+	while(times--){
+		pcur = pcur->next;
+	}
+	return pcur;
+}
+void printList(node* ptop,int times){
+	node* pcur;
+	int y = 190;
+	pcur = ptop;
+	
+	while(times--){
+		puthz(80,y,pcur->hosts.m_name,24,25,DARKGRAY);
+		setcolor(DARKGRAY);
+		outtextxy(220,y,pcur->hosts.m_phone);
+		puthz(430,y,pcur->hosts.carBandhz,24,1,DARKGRAY);
+		outtextxy(465,y,pcur->hosts.carBandstr);
+		pcur = pcur->next;
+		y += 60;
+	}
+	
+}
+void clearBlank(){
+	setfillstyle(1,WHITE);
+	bar(60,180,580,220);
+	bar(60,240,580,280);
+	bar(60,300,580,340);
+}
 
