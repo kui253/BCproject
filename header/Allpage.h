@@ -19,7 +19,13 @@
 //付款界面
 #define pagePayIns 12
 #define pageShowIfm 13
-
+//管理员界面
+#define pageAdminLogin 14
+#define pageAdminMenu 15
+#define pageAdminCheck 16
+#define pageAdminDeal2 17
+#define pageAdminDetail 18
+#define pageAdminDeal1 19
 void g_pageMain();
 void s_pageMain();
 
@@ -58,4 +64,20 @@ void s_pagePayIns();
 
 void g_pageShowIfm();
 void s_pageShowIfm();
+
+void g_pageAdminLogin();
+void s_pageAdminLogin();
+
+void g_pageAdminMenu();
+void s_pageAdminMenu();
+
+void g_pageAdminCheck();
+void s_pageAdminCheck();
+
+void g_pageAdminDetail();
+void s_pageAdminDetail();
+
+void g_pageAdminDeal2();
+void s_pageAdminDeal2();
+
 #endif

@@ -38,7 +38,7 @@ typedef struct HOST {
 	char Insphonenum_travel[15];
 	int Ins_Travel;
 
-
+	int BillsPrice;
 
 
 }host;
@@ -52,6 +52,11 @@ typedef struct NODE {
 这些函数是对应登陆的时候的操作
 *************************************************/
 //用来判断输入的密码是否正确
+void printList(node* ptop,int times);//用来打印数据
+
+void clearBlank();//用来清空现实数据的框
+
+node * modList(node* ptop);
 
 node* find_node(node* phead, char* phonenum);//这是一个查找指针，输入一个链表头和输入的电话，查找整个是不是存在
 
